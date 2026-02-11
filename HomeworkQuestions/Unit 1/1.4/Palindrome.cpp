@@ -8,6 +8,15 @@ bool isPalindrome(const string& str) {
     int right = str.length() - 1;
 
     while (left < right) {
+  
+        while (left < right && str[left] == ' ') {
+            left++;
+        }
+    
+        while (left < right && str[right] == ' ') {
+            right--;
+        }
+
         if (str[left] != str[right]) {
             return false;
         }
