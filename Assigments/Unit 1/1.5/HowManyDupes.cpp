@@ -5,7 +5,7 @@
 using namespace std;
 
 int main() {
-    vector<int> array = {1, 2, 1, 3, 2};
+    vector<int> array = {1, 1,1,3,5};
     
     unordered_map<int, int> count;
     int duplicates = 0;

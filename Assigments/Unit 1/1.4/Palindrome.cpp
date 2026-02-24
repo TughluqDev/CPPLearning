@@ -29,7 +29,7 @@ bool isPalindrome(const string& str) {
 }
 
 int main() {
-    string s1 = "madam";
+    string s1 = "ice";
     string s2 = "race car";
 
     cout << "\"" << s1 << "\" is palindrome: " << (isPalindrome(s1) ? "true" : "false") << std::endl;

@@ -11,13 +11,13 @@ int main() {
     vector<int> merged = vec1;
     merged.insert(merged.end(), vec2.begin(), vec2.end());
     
-    std::sort(merged.begin(), merged.end());
+    sort(merged.begin(), merged.end());
     
-    std::cout << "Merged and sorted vector: ";
+    cout << "Merged and sorted vector: ";
     for (int num : merged) {
-        std::cout << num << " ";
+        cout << num << " ";
     }
-    std::cout << std::endl;
+    cout << endl;
     
     return 0;
 }
