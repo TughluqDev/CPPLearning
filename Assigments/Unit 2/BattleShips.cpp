@@ -86,7 +86,7 @@ bool attack(vector<vector<char>>& opponentBoard,
     return true; 
 }
 
-int countShips(const vector<vector<char>>& board) {
+int c ountShips(const vector<vector<char>>& board) {
     int count = 0;
     for (int i = 0; i < BOARD_SIZE; i++) {
         for (int j = 0; j < BOARD_SIZE; j++) {
@@ -156,6 +156,4 @@ int main() {
     } else {
         cout << "\n PLAYER 1 WINS! \n";
     }
-
-    return 0;
 }
