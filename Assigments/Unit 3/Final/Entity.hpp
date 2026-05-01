@@ -26,7 +26,7 @@ namespace Color {
     const string BOLD   = "\033[1m";  //bold text
 }
 
-//short 5-char label for alignment in the status display
+//short 5char label for alignment in the status display
 inline string elementLabel(Element e) {
     switch (e) {
         case Element::Fire: return "Fire ";
@@ -40,11 +40,11 @@ inline string elementLabel(Element e) {
 //maps each element to a matching color so fire looks red, water looks blue etc
 inline string elementColor(Element e) {
     switch (e) {
-        case Element::Fire:  return Color::RED;
+        case Element::Fire: return Color::RED;
         case Element::Water: return Color::BLUE;
         case Element::Earth: return Color::YELLOW;
-        case Element::Air:   return Color::CYAN;
-        default:             return Color::WHITE;
+        case Element::Air: return Color::CYAN;
+        default: return Color::WHITE;
     }
 }
 
@@ -174,20 +174,17 @@ public:
         string padded = name;
         while ((int)padded.size() < 10) padded += ' ';
 
-        cout << padded
-             << "  " << Color::WHITE << "Element:" << Color::RESET
-             << "[" << elemCol << elementLabel(element) << Color::RESET << "]"
-             << "  " << Color::CYAN << "Health:" << Color::RESET << "[";
+        cout << padded << "  " << Color::WHITE << "Element:" << Color::RESET << "[" << elemCol << elementLabel(element) << Color::RESET << "]" << "  " << Color::CYAN << "Health Bar:" << Color::RESET << "[";
         //prints one block at a time so filled hp and empty space can use different colors
         for (int i = 0; i < BAR; i++) {
             if (i < filled) cout << barCol  << '#';
-            else            cout << Color::GRAY << '-';
+            else cout << Color::GRAY << '-';
         }
         cout << Color::RESET << "]"
-             << "  " << barCol << hp << "/" << maxHp << Color::RESET
-             << "  " << Color::WHITE << "Attack:" << Color::RESET << attackDmg
-             << " "  << Color::WHITE << "Defense:" << Color::RESET << defense
-             << " "  << Color::WHITE << "Speed:" << Color::RESET << speed;
+            << "  " << Color::WHITE << "HP:" << Color::RESET << " " << barCol << hp << "/" << maxHp << Color::RESET
+            << "  " << Color::WHITE << "Attack:" << Color::RESET << attackDmg
+            << " "  << Color::WHITE << "Defense:" << Color::RESET << defense
+            << " "  << Color::WHITE << "Speed:" << Color::RESET << speed;
     }
 };
 

@@ -6,6 +6,8 @@
 
 using namespace std;
 
+//battle text also uses the color strings from Entity so menus and labels pop more
+
 //returns true if any entity in the container is still alive
 bool anyAlive(const vector<Player>& party) {
     for (auto& p : party) if (p.isAlive()) return true;
@@ -44,23 +46,23 @@ int maxSpeed(const vector<T>& group) {
 
 //all display code
 void showBattleStatus(const vector<Player>& party, int activeIdx, const vector<Enemy>& enemies) {
-    cout << "\nPARTY\n";
+    cout << "\n" << Color::BOLD << Color::GREEN << "PARTY" << Color::RESET << "\n";
     for (int i = 0; i < (int)party.size(); i++) {
         //marks active character with [*] others with spaces
-        cout << (i == activeIdx ? " [*] " : "     ");
+        cout << (i == activeIdx ? " " + Color::CYAN + "[*]" + Color::RESET + "  " : "     ");
         party[i].showStatus();
-        if (!party[i].isAlive()) cout << "  [DEAD]";
-        else if (i == activeIdx) cout << "  <ACTIVE>";
+        if (!party[i].isAlive()) cout << "  " << Color::RED << "[DEAD]" << Color::RESET;
+        else if (i == activeIdx) cout << "  " << Color::CYAN << "<ACTIVE>" << Color::RESET;
         cout << "\n";
     }
 
-    cout << "\nENEMIES\n";
+    cout << "\n" << Color::BOLD << Color::RED << "ENEMIES" << Color::RESET << "\n";
     for (int i = 0; i < (int)enemies.size(); i++) {
-        cout << "  " << (i + 1) << ") ";
+        cout << "  " << Color::YELLOW << (i + 1) << ")" << Color::RESET << " ";
         if (enemies[i].isAlive()) {
             enemies[i].showStatus();
         } else {
-            cout << enemies[i].getName() << " [DEFEATED]";
+            cout << enemies[i].getName() << " " << Color::GRAY << "[DEFEATED]" << Color::RESET;
         }
         cout << "\n";
     }
@@ -71,30 +73,30 @@ void showBattleStatus(const vector<Player>& party, int activeIdx, const vector<E
 //asks the player to select a live enemy target; loops until valid
 int pickEnemyTarget(const vector<Enemy>& enemies) {
     while (true) {
-        cout << "  Pick target:\n";
+        cout << "  " << Color::WHITE << "Pick target:" << Color::RESET << "\n";
         for (int i = 0; i < (int)enemies.size(); i++)
             if (enemies[i].isAlive())
-                cout << "    " << (i + 1) << ") " << enemies[i].getName() << "\n";
-        cout << "  > ";
+                cout << "    " << Color::YELLOW << (i + 1) << ")" << Color::RESET << " " << enemies[i].getName() << "\n";
+        cout << "  " << Color::CYAN << ">" << Color::RESET << " ";
         int choice; cin >> choice; choice--;
         if (choice >= 0 && choice < (int)enemies.size() && enemies[choice].isAlive())
             return choice;
-        cout << "  Invalid choice. Try again.\n";
+        cout << "  " << Color::RED << "Invalid choice try again" << Color::RESET << "\n";
     }
 }
 
 //akss the player to switch to a different alive party member and returns currentIdx unchanged if the input is invalid
 int pickSwitch(const vector<Player>& party, int currentIdx) {
-    cout << "  Switch to:\n";
+    cout << "  " << Color::WHITE << "Switch to:" << Color::RESET << "\n";
     for (int i = 0; i < (int)party.size(); i++)
         if (i != currentIdx && party[i].isAlive())
-            cout << "    " << (i + 1) << ") " << party[i].getName() << "\n";
-    cout << "  > ";
+            cout << "    " << Color::YELLOW << (i + 1) << ")" << Color::RESET << " " << party[i].getName() << "\n";
+    cout << "  " << Color::CYAN << ">" << Color::RESET << " ";
     int choice; cin >> choice; choice--;
     if (choice >= 0 && choice < (int)party.size() &&
         choice != currentIdx && party[choice].isAlive())
         return choice;
-    cout << "  Invalid — keeping current active.\n";
+    cout << "  " << Color::RED << "Invalid choice keeping current active" << Color::RESET << "\n";
     return currentIdx;
 }
 
@@ -103,10 +105,10 @@ int pickSwitch(const vector<Player>& party, int currentIdx) {
 int playerTurn(vector<Player>& party, int activeIdx, vector<Enemy>& enemies) {
     Player& active = party[activeIdx];
 
-    cout << active.getName() << "'s turn:\n";
-    cout << "1) Attack\n";
-    cout << "2) Use Item" << (active.getInventory().empty() ? " (empty)" : "") << "\n";
-    cout << "3) Switch Active Character\n";
+    cout << Color::BOLD << Color::CYAN << active.getName() << "'s turn:" << Color::RESET << "\n";
+    cout << Color::YELLOW << "1)" << Color::RESET << " Attack\n";
+    cout << Color::YELLOW << "2)" << Color::RESET << " Use Item" << (active.getInventory().empty() ? " " + Color::GRAY + "(empty)" + Color::RESET : "") << "\n";
+    cout << Color::YELLOW << "3)" << Color::RESET << " Switch Active Character\n";
 
     int action; cin >> action;
     cout << "\n";
@@ -125,7 +127,7 @@ int playerTurn(vector<Player>& party, int activeIdx, vector<Enemy>& enemies) {
         case 2: {
             const auto& inv = active.getInventory();
             if (inv.empty()) {
-                cout << "  No items — attacking instead.\n";
+                cout << "  " << Color::GRAY << "No items, attacking instead." << Color::RESET << "\n";
                 int t = pickEnemyTarget(enemies);
                 active.attackTarget(enemies[t]);
                 if (!enemies[t].isAlive())
@@ -134,30 +136,31 @@ int playerTurn(vector<Player>& party, int activeIdx, vector<Enemy>& enemies) {
             }
 
             //show each item with its heal amount so the player can compare them fast
-            cout << "  Items:\n";
+            cout << " " << Color::GREEN << "Items:" << Color::RESET << "\n";
             for (int i = 0; i < (int)inv.size(); i++)
-                cout << "    " << (i + 1) << ") "
-                     << inv[i].getName() << " (+" << inv[i].getHealAmount() << " HP)\n";
-
+                cout << " " << Color::YELLOW << (i + 1) << ")" << Color::RESET << " " << inv[i].getName() << " " << Color::GREEN << "(+" << inv[i].getHealAmount() << " HP)" << Color::RESET << "\n";
             //items can only be used on living teammates so dead ones are skipped
-            cout << "  Use on which party member?\n";
+            cout << " " << Color::WHITE << "Use on which party member?" << Color::RESET << "\n";
             for (int i = 0; i < (int)party.size(); i++)
                 if (party[i].isAlive())
-                    cout << "    " << (i + 1) << ") " << party[i].getName() << "\n";
+                    cout << "    " << Color::YELLOW << (i + 1) << ")" << Color::RESET << " " << party[i].getName() << "\n";
 
-            cout << "  Item #: ";   int itemIdx;   cin >> itemIdx;   itemIdx--;
-            cout << "  Member #: "; int memberIdx; cin >> memberIdx; memberIdx--;
+            cout << "  " << Color::WHITE << "Item #:" << Color::RESET << " ";
+            int itemIdx; cin >> itemIdx; itemIdx--;
+            cout << "  " << Color::WHITE << "Member #:" << Color::RESET << " ";
+            int memberIdx; cin >> memberIdx; memberIdx--;
             cout << "\n";
 
+            //the item call already checks the item index, here we only make sure the teammate exists
             if (memberIdx >= 0 && memberIdx < (int)party.size() && party[memberIdx].isAlive())
                 active.useItemOn(itemIdx, party[memberIdx]);
             else
-                cout << "  Invalid target — item wasted.\n";
+                cout << "  " << Color::RED << "Invalid target, item wasted." << Color::RESET << "\n";
             break;
         }
 
         case 3: {
-            //switch active the new character then attacks this turn
+            //switch active then use the new character right away so the turn is not wasted
             activeIdx = pickSwitch(party, activeIdx);
             if (anyAlive(enemies)) {
                 int t = pickEnemyTarget(enemies);
@@ -169,7 +172,7 @@ int playerTurn(vector<Player>& party, int activeIdx, vector<Enemy>& enemies) {
         }
 
         default: {
-            cout << "Unrecognised input attacking random enemy.\n";
+            cout << Color::RED << "Unrecognised input, attacking random enemy." << Color::RESET << "\n";
             int t = randomAliveIdx(enemies);
             if (t >= 0) {
                 active.attackTarget(enemies[t]);
@@ -189,7 +192,7 @@ void allyAutoAttack(vector<Player>& party, int activeIdx, vector<Enemy>& enemies
         if (i == activeIdx || !party[i].isAlive()) continue;
         int t = randomAliveIdx(enemies);
         if (t < 0) break; //no enemies left
-        cout << "Auto ";
+        cout << Color::GRAY << "Auto " << Color::RESET;
         party[i].attackTarget(enemies[t]);
         if (!enemies[t].isAlive())
             cout << "  >> " << enemies[t].getName() << " is defeated!\n";
@@ -200,6 +203,7 @@ void allyAutoAttack(vector<Player>& party, int activeIdx, vector<Enemy>& enemies
 void enemyTurn(vector<Enemy>& enemies, vector<Player>& party) {
     for (auto& enemy : enemies) {
         if (!enemy.isAlive()) continue;
+        //every enemy rolls its own random target so they do not all dogpile the same one every time
         int t = randomAliveIdx(party);
         if (t < 0) break; //party wiped
         enemy.attackTarget(party[t]);
@@ -212,14 +216,14 @@ void enemyTurn(vector<Enemy>& enemies, vector<Player>& party) {
 
 //runs a full party-vs-enemies battle and speed determines which side acts first each round tout les allies attack every round et tout les enemies attack every round, player picks their target
 void runBattle(vector<Player>& party, int activeIdx, vector<Enemy>& enemies) {
-    cout << "BATTLE START!\n";
+    cout << Color::BOLD << Color::RED << "BATTLE START!" << Color::RESET << "\n";
     int turn = 0;
     while (anyAlive(party) && anyAlive(enemies)) {
-        cout << "\nTurn " << ++turn <<"\n";
+        cout << "\n" << Color::BOLD << Color::WHITE << "Turn " << ++turn << Color::RESET << "\n";
         showBattleStatus(party, activeIdx, enemies);
         //the side with the highest living speed stat gets to move first this round
         bool partyFirst = maxSpeed(party) >= maxSpeed(enemies);
-        cout << (partyFirst ? "Your party moves first!\n" : "Enemies move first!\n") << "\n";
+        cout << (partyFirst ? Color::GREEN + string("Your party moves first!\n") : Color::RED + string("Enemies move first!\n")) << Color::RESET << "\n";
 
         if (partyFirst) {
             //party acts and then enemies if there are anyy leftttttt
@@ -227,16 +231,16 @@ void runBattle(vector<Player>& party, int activeIdx, vector<Enemy>& enemies) {
             if (anyAlive(enemies)) allyAutoAttack(party, activeIdx, enemies);
 
             if (anyAlive(party) && anyAlive(enemies)) {
-                cout << "\nEnemies turn \n";
+                cout << "\n" << Color::RED << "Enemies turn" << Color::RESET << "\n";
                 enemyTurn(enemies, party);
             }
         } else {
             //enemies act first amd then party if there are any left
-            cout << "Enemies' turn\n";
+            cout << Color::RED << "Enemies' turn" << Color::RESET << "\n";
             enemyTurn(enemies, party);
 
             if (anyAlive(party) && anyAlive(enemies)) {
-                cout << "\nYour turn\n";
+                cout << "\n" << Color::GREEN << "Your turn" << Color::RESET << "\n";
                 activeIdx = playerTurn(party, activeIdx, enemies);
                 if (anyAlive(enemies)) allyAutoAttack(party, activeIdx, enemies);
             }
@@ -246,21 +250,21 @@ void runBattle(vector<Player>& party, int activeIdx, vector<Enemy>& enemies) {
         if (!party[activeIdx].isAlive()) {
             int next = randomAliveIdx(party);
             if (next >= 0) {
-                cout << "\n" << party[activeIdx].getName() << " is down! " << party[next].getName() << " takes the lead.\n";
+                cout << "\n" << Color::YELLOW << party[activeIdx].getName() << Color::RESET << " is down! " << Color::CYAN << party[next].getName() << Color::RESET << " takes the lead.\n";
                 activeIdx = next;
             }
         }
     }
 
-    //end of the battle summary 
+    //end of the battle summary
     if (anyAlive(party)) {
-        cout << " YOUR PARTY WINS! you won an easy game, good job?\n";
-        cout << "Survivors:\n";
+        cout << Color::BOLD << Color::GREEN << "YOUR PARTY WINS!" << Color::RESET << " you won an easy game, good job?\n";
+        cout << Color::WHITE << "Survivors:" << Color::RESET << "\n";
         for (auto& p : party) {
             if (p.isAlive()) { cout << "  "; p.showStatus(); cout << "\n"; }
         }
     } else {
-        cout << "YOUR PARTY HAS FALLEN...skill issue lmao how did u loose😹😹😹\n";
+        cout << Color::BOLD << Color::RED << "YOUR PARTY HAS FALLEN..." << Color::RESET << " skill issue lmao how did u loose\n";
     }
 }
 
