@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(g++ -std=c++17 -Wall -Wextra -o main main.cpp)",
+      "Bash(./main)",
+      "Bash(./main.exe)",
+      "Bash(g++ -std=c++17 -Wall -o game.exe main.cpp)",
+      "Bash(python3 -c ':*)",
+      "Bash(powershell -Command \"'1\\\\n' * 50 | ./game.exe\")",
+      "Bash(./game.exe)",
+      "Bash(cmd /c \"echo 1 | game.exe\")",
+      "Bash(cmd /c \"\\(echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1\\) | game.exe\")",
+      "Bash(cmd /c \"\\(echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1 && echo 1\\) | game.exe > output.txt 2>&1\")",
+      "Bash(cmd /c \"game.exe < NUL > output.txt 2>&1 & exit 0\")",
+      "Bash(cat output.txt)",
+      "Bash(printf \"1\\\\r\\\\n1\\\\r\\\\n1\\\\r\\\\n1\\\\r\\\\n1\\\\r\\\\n1\\\\r\\\\n1\\\\r\\\\n1\\\\r\\\\n1\\\\r\\\\n1\\\\r\\\\n1\\\\r\\\\n1\\\\r\\\\n1\\\\r\\\\n1\\\\r\\\\n1\\\\r\\\\n1\\\\r\\\\n1\\\\r\\\\n1\\\\r\\\\n1\\\\r\\\\n1\\\\r\\\\n1\\\\r\\\\n1\\\\r\\\\n1\\\\r\\\\n1\\\\r\\\\n1\\\\r\\\\n1\\\\r\\\\n1\\\\r\\\\n1\\\\r\\\\n1\\\\r\\\\n1\\\\r\\\\n\")",
+      "Bash(wsl -e bash -c \"printf '1\\\\n%.0s' {1..30} | ./game.exe\")",
+      "Bash(echo \"exit: $?\")",
+      "Bash(winpty ./game.exe)",
+      "Bash(g++ -std=c++17 -Wall -Wextra -Wpedantic -o game.exe main.cpp)"
+    ]
+  }
+}

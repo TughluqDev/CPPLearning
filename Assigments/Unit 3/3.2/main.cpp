@@ -62,7 +62,6 @@ int main() {
         player.showHealthBar("Naser");
         enemy.showHealthBar("Peter");
 
-        cout << "---------------------" << std::endl;
     }
 
     if (player.isAlive())

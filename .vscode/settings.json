@@ -1,6 +1,7 @@
 {
     "C_Cpp.errorSquiggles": "disabled",
     "files.exclude": {
-        "**/*.exe": true
+        "**/*.exe": true,
+        ".claude":true
     }
 }
