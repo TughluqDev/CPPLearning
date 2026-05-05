@@ -221,8 +221,8 @@ public:
                 cout << Color::GRAY << '-';
         }
         cout << Color::RESET << "]"
-             << "  " << Color::WHITE << "HP:" << Color::RESET << " " << barCol << hp << "/" << maxHp << Color::RESET
-             << "  " << Color::WHITE << "Attack:" << Color::RESET << attackDmg
+             << " " << Color::WHITE << "HP:" << Color::RESET << " " << barCol << hp << "/" << maxHp << Color::RESET
+             << " " << Color::WHITE << "Attack:" << Color::RESET << attackDmg
              << " " << Color::WHITE << "Defense:" << Color::RESET << defense
              << " " << Color::WHITE << "Speed:" << Color::RESET << speed;
     }

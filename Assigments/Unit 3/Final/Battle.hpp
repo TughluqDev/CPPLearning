@@ -111,7 +111,7 @@ int pickEnemyTarget(const vector<Enemy> &enemies)
     }
 }
 
-// akss the player to switch to a different alive party member and returns currentIdx unchanged if the input is invalid
+// asks the player to switch to a different alive party member and returns currentIdx unchanged if the input is invalid
 int pickSwitch(const vector<Player> &party, int currentIdx)
 {
     cout << "  " << Color::WHITE << "Switch to:" << Color::RESET << "\n";
@@ -172,28 +172,57 @@ int playerTurn(vector<Player> &party, int activeIdx, vector<Enemy> &enemies)
         // show each item with its heal amount so the player can compare them fast
         cout << " " << Color::GREEN << "Items:" << Color::RESET << "\n";
         for (int i = 0; i < (int)inv.size(); i++)
-            cout << " " << Color::YELLOW << (i + 1) << ")" << Color::RESET << " " << inv[i].getName() << " " << Color::GREEN << "(+" << inv[i].getHealAmount() << " HP)" << Color::RESET << "\n";
-        // items can only be used on living teammates so dead ones are skipped
-        cout << " " << Color::WHITE << "Use on which party member?" << Color::RESET << "\n";
-        for (int i = 0; i < (int)party.size(); i++)
-            if (party[i].isAlive())
-                cout << "    " << Color::YELLOW << (i + 1) << ")" << Color::RESET << " " << party[i].getName() << "\n";
+        {
+            int amount = inv[i].getHealAmount();
+            cout << " " << Color::YELLOW << (i + 1) << ")" << Color::RESET << " " << inv[i].getName() << " ";
+            if (amount >= 0)
+                cout << Color::GREEN << "(+" << amount << " HP)" << Color::RESET;
+            else
+                cout << Color::RED << "(" << -amount << " dmg)" << Color::RESET;
+            cout << "\n";
+        }
 
         cout << "  " << Color::WHITE << "Item #:" << Color::RESET << " ";
         int itemIdx;
         cin >> itemIdx;
         itemIdx--;
-        cout << "  " << Color::WHITE << "Member #:" << Color::RESET << " ";
-        int memberIdx;
-        cin >> memberIdx;
-        memberIdx--;
         cout << "\n";
 
-        // the item call already checks the item index, here we only make sure the teammate exists
-        if (memberIdx >= 0 && memberIdx < (int)party.size() && party[memberIdx].isAlive())
-            active.useItemOn(itemIdx, party[memberIdx]);
+        if (itemIdx < 0 || itemIdx >= (int)inv.size())
+        {
+            cout << "  " << Color::RED << "Invalid item." << Color::RESET << "\n";
+            break;
+        }
+
+        int amount = inv[itemIdx].getHealAmount();
+
+        // heal items still go on teammates but damage items now get aimed at enemies
+        if (amount >= 0)
+        {
+            cout << " " << Color::WHITE << "Use on which party member?" << Color::RESET << "\n";
+            for (int i = 0; i < (int)party.size(); i++)
+                if (party[i].isAlive())
+                    cout << "    " << Color::YELLOW << (i + 1) << ")" << Color::RESET << " " << party[i].getName() << "\n";
+
+            cout << "  " << Color::WHITE << "Member #:" << Color::RESET << " ";
+            int memberIdx;
+            cin >> memberIdx;
+            memberIdx--;
+            cout << "\n";
+
+            // the item call already checks the item index, here we only make sure the teammate exists
+            if (memberIdx >= 0 && memberIdx < (int)party.size() && party[memberIdx].isAlive())
+                active.useItemOn(itemIdx, party[memberIdx]);
+            else
+                cout << "  " << Color::RED << "Invalid target, item wasted." << Color::RESET << "\n";
+        }
         else
-            cout << "  " << Color::RED << "Invalid target, item wasted." << Color::RESET << "\n";
+        {
+            int enemyIdx = pickEnemyTarget(enemies);
+            active.useItemOn(itemIdx, enemies[enemyIdx]);
+            if (!enemies[enemyIdx].isAlive())
+                cout << "  >> " << enemies[enemyIdx].getName() << " is defeated!\n";
+        }
         break;
     }
 

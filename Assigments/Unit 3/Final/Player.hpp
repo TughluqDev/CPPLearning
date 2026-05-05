@@ -15,6 +15,7 @@ public:
     {
         Player p(name, 120, 14, 10, 8, 10, Element::Earth);
         p.addItem(Item("Health Potion", 35));
+        p.addItem(Item("Throwing Axe", -20));
         p.addItem(Item("Health Potion", 35));
         return p;
     }
@@ -24,6 +25,7 @@ public:
     {
         Player p(name, 75, 16, 4, 22, 30, Element::Air);
         p.addItem(Item("Adrenaline Shot", 20));
+        p.addItem(Item("Poison Dart", -18));
         p.addItem(Item("Bandage", 15));
         return p;
     }
@@ -33,6 +35,7 @@ public:
     {
         Player p(name, 65, 24, 2, 13, 20, Element::Fire);
         p.addItem(Item("Elixir", 45));
+        p.addItem(Item("Fire Bomb", -28));
         p.addItem(Item("Health Potion", 30));
         return p;
     }
