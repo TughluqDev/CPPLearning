@@ -6,7 +6,7 @@
 
 using MciSendStringWFn = MCIERROR(WINAPI *)(LPCWSTR, LPWSTR, UINT, HANDLE);
 
-// loads winmm only when we need music so g++ does not need an extra linker flag
+// lazy loads winmm so i dont have to add -lwinmm to the g++ command every time
 // btw im never implementing music ever again, its super cool but soooooo annoyingggg 😭😭
 static MciSendStringWFn getMciSendString()
 {
@@ -15,7 +15,6 @@ static MciSendStringWFn getMciSendString()
     return mciSend;
 }
 
-// turns on ansi colors in newer windows terminals so the color strings actually show right
 static void enableColors()
 {
     HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -26,11 +25,10 @@ static void enableColors()
     if (!GetConsoleMode(out, &mode))
         return;
 
-    // virtual terminal mode is what makes ansi escape codes work on windows
     SetConsoleMode(out, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
 }
 
-// looks for the first mp3 in this folder so the code still works even if the file name is weird
+// searches for any mp3 in the current folder because the actual file name is way too long to hardcode and im too lazy to rename it
 static wstring findMusicFile()
 {
     WIN32_FIND_DATAW findData;
@@ -39,11 +37,10 @@ static wstring findMusicFile()
         return L"";
     FindClose(findHandle);
 
-    // the search only checks this exe folder so the first mp3 we find is good enough
     return findData.cFileName;
 }
 
-// starts the battle music from this folder and loops it until we stop it
+// plays the music and loops it the whole time
 static void startBattleMusic()
 {
     MciSendStringWFn mciSend = getMciSendString();
@@ -54,14 +51,14 @@ static void startBattleMusic()
     if (musicPath.empty())
         return;
 
-    // wide strings keep weird file name chars safe so mci can still open the song
+    // mci needs wide strings or it breaks on the special chars in the pokemon file name lol
     wstring command = L"open \"" + musicPath + L"\" type mpegvideo alias battleMusic";
     mciSend(L"close battleMusic", nullptr, 0, nullptr);
     if (mciSend(command.c_str(), nullptr, 0, nullptr) == 0)
         mciSend(L"play battleMusic repeat", nullptr, 0, nullptr);
 }
 
-// stops the music and closes the file after the battle is over
+// stop the music when the battle ends
 static void stopBattleMusic()
 {
     MciSendStringWFn mciSend = getMciSendString();
@@ -90,7 +87,7 @@ int main()
     enableColors();
     startBattleMusic();
 
-    // title and some basic info
+    // game title and element chart
     cout << Color::BOLD << Color::WHITE << "TURN-BASED BATTLE GAME" << Color::RESET << "\n";
 
     cout << Color::WHITE << "Element chart" << Color::RESET << " " << Color::GRAY << "(attacker > defender = 1.5x damage)" << Color::RESET << ":\n";
@@ -101,7 +98,6 @@ int main()
          << Color::BLUE << "Water" << Color::RESET << " > "
          << Color::RED << "Fire" << Color::RESET << "\n\n";
 
-    // all three presets are in the party, the player just picks which one they control as the active character.
     Player warrior = Player::createWarrior();
     Player rogue = Player::createRogue();
     Player mage = Player::createMage();
@@ -118,10 +114,8 @@ int main()
         pick = 1;
     int activeIdx = pick - 1;
 
-    // builds party and enemy group
     vector<Player> party = {warrior, rogue, mage};
 
-    // a spread of elements and stat builds for all bad guys
     vector<Enemy> enemies = {
         Enemy::createGoblin(),
         Enemy::createFireDrake(),

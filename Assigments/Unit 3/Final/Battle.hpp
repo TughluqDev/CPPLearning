@@ -6,47 +6,31 @@
 
 using namespace std;
 
-// battle text also uses the color strings from Entity so menus and labels pop more
+// using the colors from Entity.hpp for all the menus and text
 
-// returns true if any entity in the container is still alive
-bool anyAlive(const vector<Player> &party)
+// checks if anyone is still alive in a vector
+template <typename T>
+bool anyAlive(const vector<T> &group)
 {
-    for (auto &p : party)
-        if (p.isAlive())
+    for (auto &x : group)
+        if (x.isAlive())
             return true;
     return false;
 }
 
-bool anyAlive(const vector<Enemy> &enemies)
-{
-    for (auto &e : enemies)
-        if (e.isAlive())
-            return true;
-    return false;
-}
-
-// returns a random alive index or -1 if all are dead
-int randomAliveIdx(const vector<Player> &party)
+// picks a random alive index returns -1 if everyones dead
+template <typename T>
+int randomAliveIdx(const vector<T> &group)
 {
     vector<int> alive;
-    // first gather only living party members so the random pick stays valid
-    for (int i = 0; i < (int)party.size(); i++)
-        if (party[i].isAlive())
+    // get all alive indexes first so we dont accidentally pick a dead guy
+    for (int i = 0; i < (int)group.size(); i++)
+        if (group[i].isAlive())
             alive.push_back(i);
     return alive.empty() ? -1 : alive[rand() % alive.size()];
 }
 
-int randomAliveIdx(const vector<Enemy> &enemies)
-{
-    vector<int> alive;
-    // does the same thing for enemies, build a list of alive indexes then roll from it
-    for (int i = 0; i < (int)enemies.size(); i++)
-        if (enemies[i].isAlive())
-            alive.push_back(i);
-    return alive.empty() ? -1 : alive[rand() % alive.size()];
-}
-
-// returns the highest speed value among alive members of a container
+// finds the highest speed among alive members in the group
 template <typename T>
 int maxSpeed(const vector<T> &group)
 {
@@ -57,7 +41,7 @@ int maxSpeed(const vector<T> &group)
     return s;
 }
 
-// all display code
+// shows everyones current stats and hp bars
 void showBattleStatus(const vector<Player> &party, int activeIdx, const vector<Enemy> &enemies)
 {
     cout << "\n"
@@ -92,7 +76,7 @@ void showBattleStatus(const vector<Player> &party, int activeIdx, const vector<E
     cout << "\n";
 }
 
-// asks the player to select a live enemy target; loops until valid
+// player picks an enemy to attack, keeps looping if they type something invalid
 int pickEnemyTarget(const vector<Enemy> &enemies)
 {
     while (true)
@@ -111,7 +95,7 @@ int pickEnemyTarget(const vector<Enemy> &enemies)
     }
 }
 
-// asks the player to switch to a different alive party member and returns currentIdx unchanged if the input is invalid
+// lets the player swap which character theyre controlling
 int pickSwitch(const vector<Player> &party, int currentIdx)
 {
     cout << "  " << Color::WHITE << "Switch to:" << Color::RESET << "\n";
@@ -129,7 +113,7 @@ int pickSwitch(const vector<Player> &party, int currentIdx)
     return currentIdx;
 }
 
-// controls the active character's action which is either attack, use item or switch active after switching, the new active still acts this tur and returns the maybe updated activeIdx.
+// handles what the player does on their turn, attack or use item or switch character
 int playerTurn(vector<Player> &party, int activeIdx, vector<Enemy> &enemies)
 {
     Player &active = party[activeIdx];
@@ -169,7 +153,7 @@ int playerTurn(vector<Player> &party, int activeIdx, vector<Enemy> &enemies)
             break;
         }
 
-        // show each item with its heal amount so the player can compare them fast
+        // list out all items and what they do so the player can pick
         cout << " " << Color::GREEN << "Items:" << Color::RESET << "\n";
         for (int i = 0; i < (int)inv.size(); i++)
         {
@@ -210,7 +194,7 @@ int playerTurn(vector<Player> &party, int activeIdx, vector<Enemy> &enemies)
             memberIdx--;
             cout << "\n";
 
-            // the item call already checks the item index, here we only make sure the teammate exists
+            // make sure the selected ally is valid before using the item on them
             if (memberIdx >= 0 && memberIdx < (int)party.size() && party[memberIdx].isAlive())
                 active.useItemOn(itemIdx, party[memberIdx]);
             else
@@ -228,7 +212,7 @@ int playerTurn(vector<Player> &party, int activeIdx, vector<Enemy> &enemies)
 
     case 3:
     {
-        // switch active then use the new character right away so the turn is not wasted
+        // switch then still attack so the whole turn isnt just wasted on swapping
         activeIdx = pickSwitch(party, activeIdx);
         if (anyAlive(enemies))
         {
@@ -257,7 +241,7 @@ int playerTurn(vector<Player> &party, int activeIdx, vector<Enemy> &enemies)
     return activeIdx;
 }
 
-// all non active alive paty members auto-attack a random live enemy
+// the other party members auto attack while u control the active one
 void allyAutoAttack(vector<Player> &party, int activeIdx, vector<Enemy> &enemies)
 {
     for (int i = 0; i < (int)party.size(); i++)
@@ -274,24 +258,24 @@ void allyAutoAttack(vector<Player> &party, int activeIdx, vector<Enemy> &enemies
     }
 }
 
-// all alive enemies attack a random alive party member
+// each enemy attacks a random party member
 void enemyTurn(vector<Enemy> &enemies, vector<Player> &party)
 {
     for (auto &enemy : enemies)
     {
         if (!enemy.isAlive())
             continue;
-        // every enemy rolls its own random target so they do not all dogpile the same one every time
+        // each enemy picks their own random target so they dont all just attack the same person
         int t = randomAliveIdx(party);
         if (t < 0)
-            break; // party wiped
+            break; // party wiped #awkwardgamermoment
         enemy.attackTarget(party[t]);
         if (!party[t].isAlive())
             cout << "  >> " << party[t].getName() << " has fallen!\n";
     }
 }
 
-// runs a full party-vs-enemies battle and speed determines which side acts first each round tout les allies attack every round et tout les enemies attack every round, player picks their target
+// main battle loop, keeps going until one side is wiped out
 void runBattle(vector<Player> &party, int activeIdx, vector<Enemy> &enemies)
 {
     cout << Color::BOLD << Color::RED << "BATTLE START!" << Color::RESET << "\n";
@@ -301,7 +285,7 @@ void runBattle(vector<Player> &party, int activeIdx, vector<Enemy> &enemies)
         cout << "\n"
              << Color::BOLD << Color::WHITE << "Turn " << ++turn << Color::RESET << "\n";
         showBattleStatus(party, activeIdx, enemies);
-        // the side with the highest living speed stat gets to move first this round
+        // whoever has the highest speed goes first this round
         bool partyFirst = maxSpeed(party) >= maxSpeed(enemies);
         cout << (partyFirst ? Color::GREEN + string("Your party moves first!\n") : Color::RED + string("Enemies move first!\n")) << Color::RESET << "\n";
 
@@ -321,7 +305,7 @@ void runBattle(vector<Player> &party, int activeIdx, vector<Enemy> &enemies)
         }
         else
         {
-            // enemies act first amd then party if there are any left
+            // enemies went first so now its the party's turn if anyone is still up
             cout << Color::RED << "Enemies' turn" << Color::RESET << "\n";
             enemyTurn(enemies, party);
 
@@ -335,7 +319,7 @@ void runBattle(vector<Player> &party, int activeIdx, vector<Enemy> &enemies)
             }
         }
 
-        // if the lead character goes down we swap to another living teammate right away
+        // if the active char dies auto swap to someone who is still alive
         if (!party[activeIdx].isAlive())
         {
             int next = randomAliveIdx(party);
@@ -348,7 +332,7 @@ void runBattle(vector<Player> &party, int activeIdx, vector<Enemy> &enemies)
         }
     }
 
-    // end of the battle summary
+    // show who won and print the survivors
     if (anyAlive(party))
     {
         cout << Color::BOLD << Color::GREEN << "YOUR PARTY WINS!" << Color::RESET << " you won an easy game, good job?\n";

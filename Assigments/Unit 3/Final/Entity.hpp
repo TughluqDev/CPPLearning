@@ -34,7 +34,7 @@ namespace Color
     const string BOLD = "\033[1m";  // bold text
 }
 
-// short 5char label for alignment in the status display
+// returns the element name as a short string for the status bar
 inline string elementLabel(Element e)
 {
     switch (e)
@@ -84,7 +84,7 @@ inline string hpColor(int hp, int maxHp)
     return Color::RED;
 }
 
-// returns damage multiplier for an attacker/defender element pair
+// checks the element matchup and returns how much to multiply damage like pokemon
 inline float elementMod(Element atk, Element def)
 {
     if (atk == Element::None || def == Element::None || atk == def)
@@ -133,15 +133,15 @@ public:
     bool isAlive() const { return hp > 0; }
     const vector<Item> &getInventory() const { return inventory; }
 
-    // mutators
+    // these just change the values
     void addItem(const Item &item) { inventory.push_back(item); }
     void takeDamage(int dmg) { hp = max(0, hp - dmg); }
     void restore(int amount) { hp = min(maxHp, hp + amount); }
 
-    // all combat code, includes dodge, base damage, elemental mods and crits
+    // does the actual attack, dodge check first then damage then element then crit
     int attackTarget(Entity &target)
     {
-        // higher target speed = higher dodge chance, hard capped at 30% so nobody is immune
+        // faster targets dodge more often but i capped it at 30% cuz otherwise it gets annoying to fight agains (Orc dodged my attack 5 times in a row and wiped my whole squad while testing)
         int dodgeChance = min(target.speed / 3, 30);
         if ((rand() % 100) < dodgeChance)
         {
@@ -149,21 +149,21 @@ public:
             return 0;
         }
 
-        // base damage: attacker dmg minus targets defense, minimum 1 so u always do something
+        // base damage is just attacker dmg minus targets defense, minimum 1 so u always do something
         int dmg = max(1, attackDmg - target.defense);
 
-        // next we apply the element match up so strong or weak elements change the damage
+        // apply the element matchup changes damage up or down
         float mod = elementMod(element, target.element);
         dmg = max(1, static_cast<int>(dmg * mod));
 
-        // after that the crit roll checks if this hit gets one more damage boost
+        // random crit check and does 1.5x if it rolls under crit chance
         bool crit = (rand() % 100) < critChance;
         if (crit)
             dmg = max(1, static_cast<int>(dmg * 1.5f));
 
         target.takeDamage(dmg);
 
-        // attack messages with colors for effectiveness and crits
+        // print the attack result with colors
         cout << "  " << name << " attacks " << target.name << " for " << Color::YELLOW << dmg << " dmg" << Color::RESET;
         if (mod > 1.0f)
             cout << " " << Color::GREEN << "Super effective!" << Color::RESET;
@@ -176,13 +176,13 @@ public:
         return dmg;
     }
 
-    // uses item at itemIndex from this entity's inventory on target.
+    // uses an item from inventory on a target entity returns false if index is invalid
     bool useItemOn(int itemIndex, Entity &target)
     {
         if (itemIndex < 0 || itemIndex >= (int)inventory.size())
             return false;
 
-        // copy values before erasing the item so we still have em after the erase
+        // grab the values before deleting the item from the vector cuz itll be gone after
         string itemName = inventory[itemIndex].getName();
         int amount = inventory[itemIndex].getHealAmount();
 
@@ -192,7 +192,7 @@ public:
             cout << " (" << Color::GREEN << "+" << amount << " HP" << Color::RESET << ")";
         cout << "!\n";
 
-        // erase removes the item from the vector so it cant be used again
+        // remove the item so u cant use the same one twice
         inventory.erase(inventory.begin() + itemIndex);
         return true;
     }
@@ -201,7 +201,7 @@ public:
     void showStatus() const
     {
         const int BAR = 20;
-        // turn hp into a number of filled blocks so the bar matches the health left
+        // calculate how many blocks to fill based on how much hp is left
         int filled = maxHp > 0 ? (hp * BAR) / maxHp : 0;
         string barCol = hpColor(hp, maxHp);
         string elemCol = elementColor(element);
@@ -212,7 +212,7 @@ public:
             padded += ' ';
 
         cout << padded << "  " << Color::WHITE << "Element:" << Color::RESET << "[" << elemCol << elementLabel(element) << Color::RESET << "]" << "  " << Color::CYAN << "Health Bar:" << Color::RESET << "[";
-        // prints one block at a time so filled hp and empty space can use different colors
+        // print the bar one block at a time so the filled and empty parts can have diff colors
         for (int i = 0; i < BAR; i++)
         {
             if (i < filled)
